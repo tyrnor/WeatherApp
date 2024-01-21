@@ -1,32 +1,94 @@
 package com.example.weatherapp.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
-import kotlinx.coroutines.launch
+import android.Manifest
+import android.app.Application
+import android.content.pm.PackageManager
+import android.location.Location
 import android.util.Log
+import androidx.core.app.ActivityCompat
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.domain.repository.WeatherRepository
+import com.example.weatherapp.ui.utils.Formatters.formatterDay
+import com.example.weatherapp.ui.utils.Formatters.formatterTime
+import com.google.android.gms.location.CurrentLocationRequest
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.Task
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import javax.inject.Inject
+
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
+    application: Application,
     private val weatherRepository: WeatherRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
+    private var fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(application)
+
+    private lateinit var currentLocation: Task<Location>
+    private lateinit var startHour: String
+    private lateinit var endHour: String
 
     fun fetchWeatherData() {
-        viewModelScope.launch {
-            try {
-                val currentWeather = weatherRepository.getCurrentWeather(41.3888, 2.159)
-                Log.d("com.example.weatherapp.ui.view.WeatherApp", "Current Weather: $currentWeather")
+        requestCurrentLocation()
+        getCurrentDateTime()
+        currentLocation.addOnSuccessListener { location ->
+            location?.let {
+                viewModelScope.launch {
+                    try {
+                        val latitude = location.latitude
+                        val longitude = location.longitude
+                        val currentWeather = weatherRepository.getCurrentWeather(latitude, longitude)
+                        Log.d("WeatherApp", "Current Weather: $currentWeather")
 
-                val hourlyWeather = weatherRepository.getHourlyWeather(41.3888, 2.159)
-                Log.d("com.example.weatherapp.ui.view.WeatherApp", "Hourly Weather: $hourlyWeather")
+                        val hourlyWeather = weatherRepository.getHourlyWeather(latitude, longitude, startHour, endHour)
+                        Log.d("WeatherApp", "Hourly Weather: $hourlyWeather")
 
-                val dailyWeather = weatherRepository.getDailyWeather(41.3888, 2.159)
-                Log.d("com.example.weatherapp.ui.view.WeatherApp", "Daily Weather: $dailyWeather")
-            } catch (e: Exception) {
-                Log.e("com.example.weatherapp.ui.view.WeatherApp", "Error fetching weather data", e)
-            }
+                        val dailyWeather = weatherRepository.getDailyWeather(latitude, longitude)
+                        Log.d("WeatherApp", "Daily Weather: $dailyWeather")
+                    } catch (e: Exception) {
+                        Log.e("WeatherApp", "Error fetching weather data", e)
+                    }
+                }
+            } ?: Log.e("WeatherApp", "Location is null")
+        }.addOnFailureListener {
+            Log.e("WeatherApp", "Failed to get location", it)
         }
     }
+      fun requestCurrentLocation(){
+         if (ActivityCompat.checkSelfPermission(
+                 getApplication(),
+                 Manifest.permission.ACCESS_FINE_LOCATION
+             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                 getApplication(),
+                 Manifest.permission.ACCESS_COARSE_LOCATION
+             ) != PackageManager.PERMISSION_GRANTED
+         ) {
+             return
+         }
+         currentLocation = fusedLocationClient
+            .getCurrentLocation(
+                CurrentLocationRequest
+                    .Builder()
+                    .setMaxUpdateAgeMillis(15000)
+                    .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+                    .build(),
+                null)
+        currentLocation.addOnSuccessListener {
+            Log.d("TAG", "requestCurrentLocation: ${it.latitude} ${it.longitude}")
+        }
+    }
+    private fun getCurrentDateTime(){
+        val currentDay = LocalDateTime.now().format(formatterDay)
+        val nextDay = LocalDateTime.now().plusDays(1).format(formatterDay)
+        val currentTime = LocalDateTime.now().format(formatterTime)
+        startHour = "${currentDay}T${currentTime}:00"
+        endHour = "${nextDay}T${currentTime}:00"
+    }
 }
+

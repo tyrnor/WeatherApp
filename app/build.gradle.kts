@@ -68,6 +68,12 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:$retrofit_version")
     implementation("com.squareup.retrofit2:converter-gson:$retrofit_version")
 
+    //EasyPermissions
+    implementation ("pub.devrel:easypermissions:3.0.0")
+
+    implementation ("com.google.android.gms:play-services-location:21.0.1")
+
+
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.8.2")

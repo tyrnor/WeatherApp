@@ -11,20 +11,26 @@ interface OpenMeteoService {
     suspend fun getCurrentWeather(
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
-        @Query("current") current: String
+        @Query("current") current: String,
+        @Query("timezone") timezone: String = "auto"
     ): CurrentWeatherResponse
+
 
     @GET("forecast")
     suspend fun getHourlyWeather(
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
-        @Query("hourly") hourly: String
+        @Query("hourly") hourly: String,
+        @Query("timezone") timezone: String = "auto",
+        @Query("start_hour") startHour: String,
+        @Query("end_hour") endHour: String
     ): HourlyWeatherResponse
 
     @GET("forecast")
     suspend fun getDailyWeather(
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
-        @Query("daily") daily: String
+        @Query("daily") daily: String,
+        @Query("timezone") timezone: String = "auto"
     ): DailyWeatherResponse
 }
