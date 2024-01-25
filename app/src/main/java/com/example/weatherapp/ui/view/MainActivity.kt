@@ -14,6 +14,7 @@ import com.example.weatherapp.ui.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
+import java.util.Locale
 
 private const val REQUEST_LOCATION_PERMISSION = 1
 @AndroidEntryPoint
@@ -23,7 +24,6 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mainViewModel.requestCurrentLocation()
         requestLocationPermission()
     }
 

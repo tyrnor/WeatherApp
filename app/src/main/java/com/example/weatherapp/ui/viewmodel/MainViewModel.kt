@@ -3,8 +3,10 @@ package com.example.weatherapp.ui.viewmodel
 import android.Manifest
 import android.app.Application
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.location.Location
 import android.util.Log
+
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +23,7 @@ import com.google.android.gms.tasks.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
+import java.util.Locale
 import javax.inject.Inject
 
 
@@ -47,6 +50,8 @@ class MainViewModel @Inject constructor(
                     try {
                         val latitude = location.latitude
                         val longitude = location.longitude
+                        val cityName = getCityName(latitude, longitude)
+                        Log.d("WeatherApp", "fetchWeatherData: $cityName")
                         val currentWeather = fetchCurrentWeatherUseCase(latitude, longitude)
                         Log.d("WeatherApp", "Current Weather: $currentWeather")
 
@@ -63,8 +68,13 @@ class MainViewModel @Inject constructor(
         }.addOnFailureListener {
             Log.e("WeatherApp", "Failed to get location", it)
         }
+
+
     }
-      fun requestCurrentLocation(){
+
+
+
+    private fun requestCurrentLocation(){
          if (ActivityCompat.checkSelfPermission(
                  getApplication(),
                  Manifest.permission.ACCESS_FINE_LOCATION
@@ -94,5 +104,11 @@ class MainViewModel @Inject constructor(
         startHour = "${currentDay}T${currentTime}:00"
         endHour = "${nextDay}T${currentTime}:00"
     }
+    private fun getCityName(latitude: Double, longitude: Double) : String {
+        val geocoder = Geocoder(getApplication(), Locale.getDefault())
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+        return addresses?.firstOrNull()?.locality ?: "Unknown Location"
+    }
+
 }
 

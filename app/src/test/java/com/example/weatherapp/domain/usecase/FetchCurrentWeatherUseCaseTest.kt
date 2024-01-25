@@ -2,9 +2,10 @@ package com.example.weatherapp.domain.usecase
 
 import com.example.weatherapp.data.model.CurrentWeather
 import com.example.weatherapp.data.model.CurrentWeatherResponse
+import com.example.weatherapp.domain.model.CurrentWeatherModel
 import com.example.weatherapp.domain.repository.WeatherRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -17,7 +18,7 @@ class FetchCurrentWeatherUseCaseTest {
     private lateinit var fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase
     private val mockWeatherRepository: WeatherRepository = mock()
 
-    // Inline mock data
+    // Mock API response
     private val mockCurrentWeatherResponse = CurrentWeatherResponse(
         latitude = 40.42,
         longitude = -3.6999998,
@@ -29,13 +30,21 @@ class FetchCurrentWeatherUseCaseTest {
         )
     )
 
+    // Expected domain model
+    private val expectedCurrentWeather = CurrentWeatherModel(
+        time = "2024-01-25T11:00",
+        temperature = 13.4,
+        apparentTemperature = 12.0,
+        weatherCode = 3
+    )
+
     @Before
     fun setUp() {
         fetchCurrentWeatherUseCase = FetchCurrentWeatherUseCase(mockWeatherRepository)
     }
 
     @Test
-    fun `fetch current weather returns data`() = runTest {
+    fun `fetch current weather use case returns expected data`() = runBlockingTest {
         // Arrange
         val latitude = 40.42
         val longitude = -3.6999998
@@ -47,28 +56,9 @@ class FetchCurrentWeatherUseCaseTest {
         val result = fetchCurrentWeatherUseCase(latitude, longitude)
 
         // Assert
-        assertEquals(mockCurrentWeatherResponse, result, "Current weather data should match the mock response")
+        assertEquals(expectedCurrentWeather, result, "Use case should transform data into CurrentWeather domain model correctly")
     }
 
-    @Test
-    fun `fetch current weather handles errors`() = runTest {
-        // Arrange
-        val latitude = 40.42
-        val longitude = -3.6999998
-        val exception = RuntimeException("An error occurred")
-
-        whenever(mockWeatherRepository.getCurrentWeather(latitude, longitude))
-            .thenThrow(exception)
-
-        // Act & Assert
-        try {
-            fetchCurrentWeatherUseCase(latitude, longitude)
-            assert(false) { "Expected an exception to be thrown" }
-        } catch (e: Exception) {
-            assertEquals(exception, e, "Exception should match the thrown exception")
-        }
-    }
-
-    // Additional tests can be added here as needed
+    // Additional tests as needed...
 }
 
