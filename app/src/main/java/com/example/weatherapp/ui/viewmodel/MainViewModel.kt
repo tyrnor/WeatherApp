@@ -8,7 +8,9 @@ import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.weatherapp.domain.repository.WeatherRepository
+import com.example.weatherapp.domain.usecase.FetchCurrentWeatherUseCase
+import com.example.weatherapp.domain.usecase.FetchDailyWeatherUseCase
+import com.example.weatherapp.domain.usecase.FetchHourlyWeatherUseCase
 import com.example.weatherapp.ui.utils.Formatters.formatterDay
 import com.example.weatherapp.ui.utils.Formatters.formatterTime
 import com.google.android.gms.location.CurrentLocationRequest
@@ -25,7 +27,9 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     application: Application,
-    private val weatherRepository: WeatherRepository
+    private val fetchCurrentWeatherUseCase: FetchCurrentWeatherUseCase,
+    private val fetchHourlyWeatherUseCase: FetchHourlyWeatherUseCase,
+    private val fetchDailyWeatherUseCase: FetchDailyWeatherUseCase
 ) : AndroidViewModel(application) {
     private var fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(application)
@@ -43,13 +47,13 @@ class MainViewModel @Inject constructor(
                     try {
                         val latitude = location.latitude
                         val longitude = location.longitude
-                        val currentWeather = weatherRepository.getCurrentWeather(latitude, longitude)
+                        val currentWeather = fetchCurrentWeatherUseCase(latitude, longitude)
                         Log.d("WeatherApp", "Current Weather: $currentWeather")
 
-                        val hourlyWeather = weatherRepository.getHourlyWeather(latitude, longitude, startHour, endHour)
+                        val hourlyWeather = fetchHourlyWeatherUseCase(latitude, longitude, startHour, endHour)
                         Log.d("WeatherApp", "Hourly Weather: $hourlyWeather")
 
-                        val dailyWeather = weatherRepository.getDailyWeather(latitude, longitude)
+                        val dailyWeather = fetchDailyWeatherUseCase(latitude, longitude)
                         Log.d("WeatherApp", "Daily Weather: $dailyWeather")
                     } catch (e: Exception) {
                         Log.e("WeatherApp", "Error fetching weather data", e)
