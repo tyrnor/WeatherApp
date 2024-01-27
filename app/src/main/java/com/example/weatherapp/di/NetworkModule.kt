@@ -30,9 +30,4 @@ object NetworkModule {
         return retrofit.create(OpenMeteoService::class.java)
     }
 
-    @Provides
-    @Singleton
-    fun provideWeatherRepository(service: OpenMeteoService): WeatherRepository {
-        return WeatherRepositoryImpl(service)
-    }
 }
