@@ -1,22 +1,27 @@
 package com.example.weatherapp.ui.view
+
 import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.example.weatherapp.domain.model.CurrentWeatherModel
+import com.example.weatherapp.ui.state.WeatherState
 import com.example.weatherapp.ui.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog
 import pub.devrel.easypermissions.EasyPermissions
-import java.util.Locale
 
 private const val REQUEST_LOCATION_PERMISSION = 1
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
 
@@ -29,13 +34,44 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
 
     @Composable
     fun WeatherApp(isPermissionGranted: Boolean) {
-        val viewModel: MainViewModel = mainViewModel
+        val currentWeather by mainViewModel.currentWeatherState.collectAsState()
+        val cityName by mainViewModel.cityName.collectAsState()
         val canFetchData by remember { mutableStateOf(isPermissionGranted) }
 
-        Button(onClick = { if (canFetchData) viewModel.fetchWeatherData() },
-            enabled = canFetchData) {
-            Text("Fetch Weather Data")
+        LaunchedEffect(key1 = Unit) {
+            if (canFetchData) {
+                mainViewModel.getCurrentWeather()
+            }
         }
+
+        when (currentWeather) {
+            is WeatherState.Loading -> LoadingView()
+            is WeatherState.Success -> CurrentWeatherView(
+                weather = (currentWeather as WeatherState.Success.CurrentWeatherSuccess).data,
+                cityName = cityName
+            )
+
+            is WeatherState.Error -> ErrorView(message = (currentWeather as WeatherState.Error).message)
+        }
+
+    }
+
+    @Composable
+    fun ErrorView(message: String) {
+        Text(text = message)
+    }
+
+    @Composable
+    fun CurrentWeatherView(weather: CurrentWeatherModel, cityName: String) {
+        Column {
+            Text(text = cityName)
+            Text(text = weather.temperature.toString())
+        }
+    }
+
+    @Composable
+    fun LoadingView() {
+        Text(text = "Loading")
     }
 
     private fun requestLocationPermission() {
@@ -52,7 +88,11 @@ class MainActivity : ComponentActivity(), EasyPermissions.PermissionCallbacks {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray,
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
