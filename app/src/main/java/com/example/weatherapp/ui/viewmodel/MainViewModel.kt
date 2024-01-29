@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -96,11 +97,11 @@ class MainViewModel @Inject constructor(
                     }
                     fetchDailyWeatherUseCase(latitude, longitude).let { result ->
                         result.onSuccess { weather ->
-                            _hourlyWeatherState.value =
+                            _dailyWeatherState.value =
                                 WeatherState.Success.DailyWeatherSuccess(weather)
                         }
                         result.onFailure { throwable ->
-                            _hourlyWeatherState.value =
+                            _dailyWeatherState.value =
                                 WeatherState.Error(throwable.message ?: "Unknown Error")
                         }
                     }
