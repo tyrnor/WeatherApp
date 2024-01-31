@@ -11,7 +11,7 @@ class WeatherRepositoryImpl @Inject constructor(private val openMeteoService: Op
     WeatherRepository {
 
     override suspend fun getCurrentWeather(latitude: Double, longitude: Double): CurrentWeatherResponse {
-        return openMeteoService.getCurrentWeather(latitude, longitude, current = "temperature_2m,apparent_temperature,weather_code")
+        return openMeteoService.getCurrentWeather(latitude, longitude, current = "temperature_2m,apparent_temperature,is_day,weather_code")
     }
 
     override suspend fun getHourlyWeather(latitude: Double, longitude: Double, startHour: String, endHour: String): HourlyWeatherResponse {

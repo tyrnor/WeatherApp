@@ -17,6 +17,7 @@ class FetchCurrentWeatherUseCase @Inject constructor(private val weatherReposito
                     time = response.current.time,
                     temperature = response.current.temperature2m,
                     apparentTemperature = response.current.apparentTemperature,
+                    isDay = response.current.isDay,
                     weatherCode = response.current.weatherCode
                 )
             )

@@ -1,10 +1,14 @@
 package com.example.weatherapp.ui.utils
 
+import com.example.weatherapp.R
+
 object WeatherCodeTranslator {
     fun translate(code: Int): String {
         return when (code) {
             0 -> "Clear sky"
-            in 1..3 -> "Partly cloudy"
+            1 -> "Mostly clear"
+            2 -> "Partly cloudy"
+            3 -> "Cloudy"
             in 45..48 -> "Fog"
             in 51..55 -> "Drizzle"
             in 56..57 -> "Freezing Drizzle"
@@ -17,6 +21,13 @@ object WeatherCodeTranslator {
             95 -> "Thunderstorm"
             in 96..99 -> "Thunderstorm with hail"
             else -> "Unknown Weather"
+        }
+    }
+    fun convertToIcon(code: Int) : Int {
+        return when (code) {
+            0 -> R.drawable.clear_sky_ic
+            in 1..3 -> R.drawable.cloudy_ic
+            else -> R.drawable.clear_sky_ic
         }
     }
 }

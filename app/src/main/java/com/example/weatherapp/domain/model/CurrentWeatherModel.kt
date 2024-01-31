@@ -7,6 +7,7 @@ data class CurrentWeatherModel(
     val time: String,
     val temperature: Double,
     val apparentTemperature: Double,
+    val isDay: Int,
     val weatherCode: Int
 ) {
     val description : String

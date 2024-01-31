@@ -75,6 +75,11 @@ dependencies {
     implementation ("com.google.android.gms:play-services-location:21.0.1")
 
 
+    //Coil
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
+    //Shimmer
+    implementation("com.valentinilk.shimmer:compose-shimmer:1.2.0")
 
 
     implementation("androidx.core:core-ktx:1.12.0")

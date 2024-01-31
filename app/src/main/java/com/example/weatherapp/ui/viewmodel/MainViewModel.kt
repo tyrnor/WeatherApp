@@ -5,14 +5,17 @@ import android.app.Application
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
-import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.weatherapp.domain.model.CurrentWeatherModel
+import com.example.weatherapp.domain.model.DailyWeatherModel
+import com.example.weatherapp.domain.model.HourlyWeatherModel
 import com.example.weatherapp.domain.usecase.FetchCurrentWeatherUseCase
 import com.example.weatherapp.domain.usecase.FetchDailyWeatherUseCase
 import com.example.weatherapp.domain.usecase.FetchHourlyWeatherUseCase
 import com.example.weatherapp.ui.state.WeatherState
+import com.example.weatherapp.ui.utils.BackgroundSelector
 import com.example.weatherapp.ui.utils.Formatters.formatterDay
 import com.example.weatherapp.ui.utils.Formatters.formatterTime
 import com.google.android.gms.location.CurrentLocationRequest
@@ -27,6 +30,7 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 
 @HiltViewModel
@@ -50,6 +54,23 @@ class MainViewModel @Inject constructor(
     private val _cityName = MutableStateFlow("")
     val cityName: StateFlow<String> = _cityName
 
+    private val _minTemp = MutableStateFlow(0)
+    val minTemp: StateFlow<Int> = _minTemp
+
+    private val _maxTemp = MutableStateFlow(0)
+    val maxTemp: StateFlow<Int> = _maxTemp
+
+    private val _background = MutableStateFlow(0)
+    val background: StateFlow<Int> = _background
+
+    private val _isDay = MutableStateFlow(1)
+    val isDay: StateFlow<Int> = _isDay
+
+
+    private var cachedCurrentWeather: CurrentWeatherModel? = null
+    private var cachedHourlyWeather: HourlyWeatherModel? = null
+    private var cachedDailyWeather: DailyWeatherModel? = null
+
 
     private var fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(application)
@@ -58,53 +79,87 @@ class MainViewModel @Inject constructor(
     private lateinit var startHour: String
     private lateinit var endHour: String
 
+    var latitude: Double = 0.0
+    var longitude: Double = 0.0
 
-    fun getCurrentWeather() {
-        requestCurrentLocation()
-        getCurrentDateTime()
-        var latitude: Double
-        var longitude: Double
+    init {
+        viewModelScope.launch {
+            requestCurrentLocation()
+            getCurrentDateTime()
+            getIsDay(latitude, longitude)
+            getCurrentWeather()
+        }
+    }
+
+    private suspend fun getCurrentWeather() {
         currentLocation.addOnSuccessListener { location ->
             location?.let {
                 latitude = it.latitude
                 longitude = it.longitude
                 _cityName.value = getCityName(latitude, longitude)
                 viewModelScope.launch {
-                    fetchCurrentWeatherUseCase(latitude, longitude).let { result ->
-                        result.onSuccess { weather ->
-                            _currentWeatherState.value =
-                                WeatherState.Success.CurrentWeatherSuccess(weather)
+                    if (cachedCurrentWeather == null) {
+                        fetchCurrentWeatherUseCase(latitude, longitude).let { result ->
+                            result.onSuccess { weather ->
+                                _background.value =
+                                    BackgroundSelector.select(weather.weatherCode, weather.isDay)
+                                cachedCurrentWeather = weather
+                                _currentWeatherState.value =
+                                    WeatherState.Success.CurrentWeatherSuccess(weather)
+                            }
+                            result.onFailure { throwable ->
+                                _currentWeatherState.value =
+                                    WeatherState.Error(throwable.message ?: "Unknown Error")
+                            }
                         }
-                        result.onFailure { throwable ->
-                            _currentWeatherState.value =
-                                WeatherState.Error(throwable.message ?: "Unknown Error")
-                        }
+                    } else {
+                        _background.value = BackgroundSelector.select(
+                            cachedCurrentWeather!!.weatherCode,
+                            cachedCurrentWeather!!.isDay
+                        )
+                        _currentWeatherState.value =
+                            WeatherState.Success.CurrentWeatherSuccess(cachedCurrentWeather!!)
                     }
-                    fetchHourlyWeatherUseCase(
-                        latitude,
-                        longitude,
-                        startHour,
-                        endHour
-                    ).let { result ->
-                        result.onSuccess { weather ->
-                            _hourlyWeatherState.value =
-                                WeatherState.Success.HourlyWeatherSuccess(weather)
+                    if (cachedHourlyWeather == null) {
+                        fetchHourlyWeatherUseCase(
+                            latitude,
+                            longitude,
+                            startHour,
+                            endHour
+                        ).let { result ->
+                            result.onSuccess { weather ->
+                                cachedHourlyWeather = weather
+                                _hourlyWeatherState.value =
+                                    WeatherState.Success.HourlyWeatherSuccess(weather)
+                            }
+                            result.onFailure { throwable ->
+                                _hourlyWeatherState.value =
+                                    WeatherState.Error(throwable.message ?: "Unknown Error")
+                            }
                         }
-                        result.onFailure { throwable ->
-                            _hourlyWeatherState.value =
-                                WeatherState.Error(throwable.message ?: "Unknown Error")
-                        }
+                    } else {
+                        _hourlyWeatherState.value =
+                            WeatherState.Success.HourlyWeatherSuccess(cachedHourlyWeather!!)
                     }
-                    fetchDailyWeatherUseCase(latitude, longitude).let { result ->
-                        result.onSuccess { weather ->
-                            _dailyWeatherState.value =
-                                WeatherState.Success.DailyWeatherSuccess(weather)
+                    if (cachedDailyWeather == null) {
+                        fetchDailyWeatherUseCase(latitude, longitude).let { result ->
+                            result.onSuccess { weather ->
+                                _minTemp.value = weather.minTemperature[0].roundToInt()
+                                _maxTemp.value = weather.maxTemperature[0].roundToInt()
+                                cachedDailyWeather = weather
+                                _dailyWeatherState.value =
+                                    WeatherState.Success.DailyWeatherSuccess(weather)
+                            }
+                            result.onFailure { throwable ->
+                                _dailyWeatherState.value =
+                                    WeatherState.Error(throwable.message ?: "Unknown Error")
+                            }
                         }
-                        result.onFailure { throwable ->
-                            _dailyWeatherState.value =
-                                WeatherState.Error(throwable.message ?: "Unknown Error")
-                        }
+                    } else {
+                        _dailyWeatherState.value =
+                            WeatherState.Success.DailyWeatherSuccess(cachedDailyWeather!!)
                     }
+
                 }
             } ?: kotlin.run {
                 _currentWeatherState.value = WeatherState.Error("Location not available")
@@ -151,5 +206,11 @@ class MainViewModel @Inject constructor(
         return addresses?.firstOrNull()?.locality ?: "Unknown Location"
     }
 
+
+    private suspend fun getIsDay(latitude: Double, longitude: Double) {
+        fetchCurrentWeatherUseCase(latitude, longitude).onSuccess {
+            _isDay.value = it.isDay
+        }
+    }
 }
 

@@ -15,11 +15,10 @@ data class DailyWeatherModel(
     val apparentMinTemperature: List<Double>,
     val weatherCode: List<Int>,
 ) {
-    val descriptions: List<String>
-        get() = weatherCode.map { code -> WeatherCodeTranslator.translate(code) }
-
     val dayOfWeek: List<String>
         get() = time.map { time -> getDayOfWeek(time).substring(0, 3) }
+    val icons : List<Int>
+        get() = weatherCode.map { weatherCode -> WeatherCodeTranslator.convertToIcon(weatherCode) }
 
     private fun getDayOfWeek(dateString: String): String {
         val date = LocalDate.parse(dateString, formatterDay)
