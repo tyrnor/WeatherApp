@@ -22,6 +22,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import coil.compose.SubcomposeAsyncImage
 import com.example.weatherapp.ui.state.WeatherState
+import com.example.weatherapp.ui.view.composable.CurrentLoadingView
+import com.example.weatherapp.ui.view.composable.CurrentWeatherView
+import com.example.weatherapp.ui.view.composable.DailyLoadingView
+import com.example.weatherapp.ui.view.composable.DailyWeatherView
+import com.example.weatherapp.ui.view.composable.HourlyLoadingView
+import com.example.weatherapp.ui.view.composable.HourlyWeatherView
 import com.example.weatherapp.ui.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import pub.devrel.easypermissions.AppSettingsDialog

@@ -1,4 +1,4 @@
-package com.example.weatherapp.ui.view
+package com.example.weatherapp.ui.view.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -15,17 +15,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.SubcomposeAsyncImage
 import com.example.weatherapp.R
 import com.example.weatherapp.domain.model.HourlyWeatherInfo
 import com.example.weatherapp.domain.model.HourlyWeatherModel
+import com.example.weatherapp.ui.theme.AppTypography.appTypography
 import com.valentinilk.shimmer.shimmer
 
 @Composable
@@ -59,11 +56,9 @@ fun WeatherItemView(index: Int, data: HourlyWeatherInfo) {
         modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp)
     ) {
         Text(
-            text = if (index == 0) "Now" else hour.toString(), style = TextStyle(
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold,
-                shadow = Shadow(color = Color.Black, offset = Offset(3f, 3f), blurRadius = 4f)
-            ), color = Color.White.copy(alpha = 0.5f)
+            text = if (index == 0) "Now" else hour.toString(),
+            style = appTypography.displayMediumShadow,
+            color = Color.White.copy(alpha = 0.5f)
         )
         SubcomposeAsyncImage(
             model = icon,
@@ -72,11 +67,9 @@ fun WeatherItemView(index: Int, data: HourlyWeatherInfo) {
             modifier = Modifier.size(48.dp)
         )
         Text(
-            text = "${temp}°", style = TextStyle(
-                fontSize = 18.sp,
-                fontWeight = FontWeight.SemiBold,
-                shadow = Shadow(color = Color.Black, offset = Offset(3f, 3f), blurRadius = 10f)
-            ), color = Color.White
+            text = "${temp}°",
+            style = appTypography.displayMediumShadow.copy(fontSize = 18.sp),
+            color = Color.White
         )
     }
 
@@ -92,7 +85,7 @@ fun HourlyLoadingView() {
             .background(
                 Color.Transparent, shape = RoundedCornerShape(16.dp)
             ), colors = CardDefaults.cardColors(containerColor = Color.White.copy(0.3f))
-    ){
+    ) {
         LazyRow(
             modifier = Modifier.background(Color.Transparent)
         ) {
@@ -102,10 +95,9 @@ fun HourlyLoadingView() {
                     modifier = Modifier.padding(vertical = 16.dp, horizontal = 8.dp)
                 ) {
                     Text(
-                        text =  "Now", style = TextStyle(
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        ), color = Color.Transparent
+                        text = "Now",
+                        style = appTypography.displayMediumNoShadow,
+                        color = Color.Transparent
                     )
                     SubcomposeAsyncImage(
                         model = R.drawable.clear_sky_ic,
@@ -115,10 +107,9 @@ fun HourlyLoadingView() {
                         alpha = 0f
                     )
                     Text(
-                        text = "00°", style = TextStyle(
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.SemiBold,
-                        ), color = Color.Transparent
+                        text = "00°",
+                        style = appTypography.displayMediumNoShadow.copy(fontSize = 18.sp),
+                        color = Color.Transparent
                     )
                 }
             }
