@@ -4,6 +4,8 @@ WeatherApp is a modern Android application designed to provide real-time weather
 Utilizing the latest Android development technologies and Jetpack Compose for UI, this app offers an elegant and intuitive user experience. 
 It is primarily educational, aimed at showcasing best practices in Android development, including MVVM and Clean Architecture.
 
+![App Screenshot](images/overview.png) ![App Screenshot](images/overview2.png)
+
 
 ## Architecture
 WeatherApp adheres to the Model-View-ViewModel (MVVM) architecture, cleanly separating the UI (View) from the data (Model) and business logic (ViewModel). 
