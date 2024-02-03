@@ -37,6 +37,7 @@ It also follows the Clean Architecture principles, dividing the codebase into th
 - Customizable Locations: Ability to save and view weather for multiple locations.
 - Settings: User preferences for units (Celsius/Fahrenheit), themes, etc.
 - Weather Maps: Interactive maps showing weather patterns and radar data.
+- More Data: Display more detailed data about weather.
 
 ## License
 
