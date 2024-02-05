@@ -1,6 +1,6 @@
 # Android Weather App
 ## Overview
-WeatherApp is a modern Android application designed to provide real-time weather information. 
+WeatherApp is a modern Android application designed to provide real-time weather information using OpenMeteoAPI. 
 Utilizing the latest Android development technologies and Jetpack Compose for UI, this app offers an elegant and intuitive user experience. 
 It is primarily educational, aimed at showcasing best practices in Android development, including MVVM and Clean Architecture.
 
