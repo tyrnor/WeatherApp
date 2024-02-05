@@ -1,6 +1,6 @@
 # Android Weather App
 ## Overview
-WeatherApp is a modern Android application designed to provide real-time weather information using OpenMeteoAPI. 
+WeatherApp is a simple Android application designed to provide real-time weather information through OpenMeteoAPI. 
 Utilizing the latest Android development technologies and Jetpack Compose for UI, this app offers an elegant and intuitive user experience. 
 It is primarily educational, aimed at showcasing best practices in Android development, including MVVM and Clean Architecture.
 
@@ -17,11 +17,11 @@ It also follows the Clean Architecture principles, dividing the codebase into th
 
 - Current Weather: Displays the current weather details, including temperature, conditions, and location-based data.
 - Hourly Forecast: Offers an hourly weather forecast, allowing users to plan their day with precision.
-- Daily Forecast: Shows a 7-day weather outlook with key information such as high/low temperatures and general conditions
+- Daily Forecast: Shows a 7-day weather outlook with key information such as high/low temperatures and general conditions.
 
 ### User Experience
 
-- Dynamic Background: The background image dynamically changes based on the current weather conditions, enhancing the user's visual experience.
+- Dynamic Background: The background image dynamically changes based on the current weather conditions and day/night, enhancing the user's visual experience.
 - Location-Based Results: Automatically fetches and displays weather data based on the user's current location.
 
 ### Libraries Used
